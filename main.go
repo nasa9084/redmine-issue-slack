@@ -94,7 +94,7 @@ func listenEvent(ctx context.Context) {
 	for e := range slackRTMClient.Events() {
 		switch typ := e.Type(); typ {
 		case rtm.MessageType:
-			processMessage(ctx, e.Data().(*rtm.MessageEvent))
+			go processMessage(ctx, e.Data().(*rtm.MessageEvent))
 		default:
 		}
 	}
@@ -117,7 +117,7 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 		Fields: objects.AttachmentFieldList{
 			&objects.AttachmentField{
 				Title: "担当者",
-				Value: fmt.Sprintf("<%s>", getUser(ctx, issue.AssignedTo)),
+				Value: fmt.Sprintf("%s", getUser(ctx, issue.AssignedTo)),
 				Short: true,
 			},
 			&objects.AttachmentField{
@@ -151,6 +151,9 @@ func extractTicketID(s string) int {
 }
 
 func getUser(ctx context.Context, idname *redmine.IdName) string {
+	if idname == nil {
+		return ""
+	}
 	id := idname.Name
 	if i, ok := userMap[idname.Name]; ok {
 		id = i
@@ -158,7 +161,7 @@ func getUser(ctx context.Context, idname *redmine.IdName) string {
 	ru, err := redmineClient.User(idname.Id)
 	if err != nil {
 		if id == "channel" {
-			return "!" + id
+			return "<!" + id + ">"
 		}
 		return id
 	}
@@ -171,7 +174,7 @@ func getUser(ctx context.Context, idname *redmine.IdName) string {
 	}
 	for _, su := range sul {
 		if su.Name == ru.Login {
-			return "@" + su.ID
+			return "<@" + su.ID + ">"
 		}
 	}
 	return ru.Login
