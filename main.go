@@ -118,7 +118,7 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 		Fields: objects.AttachmentFieldList{
 			&objects.AttachmentField{
 				Title: "担当者",
-				Value: fmt.Sprintf("%s", getUser(ctx, issue.AssignedTo)),
+				Value: fmt.Sprintf("%s", issue.AssignedTo.Name), //getUser(ctx, issue.AssignedTo)),
 				Short: true,
 			},
 			&objects.AttachmentField{
