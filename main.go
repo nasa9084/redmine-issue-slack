@@ -23,7 +23,8 @@ type options struct {
 }
 
 type slackOptions struct {
-	Token string `short:"t" long:"slack-token" env:"SLACK_TOKEN" required:"true" description:"API Token for slack bot"`
+	Token   string `short:"t" long:"slack-token" env:"SLACK_TOKEN" required:"true" description:"API Token for slack bot"`
+	Channel string `short:"c" long:"slack-channel" env:"SLACK_CHANNEL" required:"true" description:"Slack channel to post to"`
 }
 
 type redmineOptions struct {
@@ -127,7 +128,7 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 			},
 		},
 	}
-	slackRESTClient.Chat().PostMessage("#bot_dev").LinkNames(true).Text(msg).Attachment(attachment).Do(ctx)
+	slackRESTClient.Chat().PostMessage(opts.Slack.Channel).LinkNames(true).Text(msg).Attachment(attachment).Do(ctx)
 }
 
 func extractTicketID(s string) int {
