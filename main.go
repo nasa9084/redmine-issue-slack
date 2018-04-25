@@ -118,7 +118,7 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 		Fields: objects.AttachmentFieldList{
 			&objects.AttachmentField{
 				Title: "担当者",
-				Value: fmt.Sprintf("%s", issue.AssignedTo.Name), //getUser(ctx, issue.AssignedTo)),
+				Value: fmt.Sprintf("%s", getUser(ctx, issue.AssignedTo)),
 				Short: true,
 			},
 			&objects.AttachmentField{
@@ -155,28 +155,40 @@ func getUser(ctx context.Context, idname *redmine.IdName) string {
 	if idname == nil {
 		return ""
 	}
-	id := idname.Name
-	if i, ok := userMap[idname.Name]; ok {
-		id = i
-	}
-	ru, err := redmineClient.User(idname.Id)
+	redmineUser, err := redmineClient.User(idname.Id)
 	if err != nil {
-		if id == "channel" {
-			return "<!" + id + ">"
-		}
-		return id
+		return idname.Name
 	}
-	if login, ok := userMap[ru.Login]; ok {
-		ru.Login = login
-	}
-	sul, err := slackRESTClient.Users().List().Do(ctx)
+	slackUserList, err := slackRESTClient.Users().List().Do(ctx)
 	if err != nil {
-		return ru.Login
+		return idname.Name
 	}
-	for _, su := range sul {
-		if su.Name == ru.Login {
-			return "<@" + su.ID + ">"
+	for _, slackUser := range slackUserList {
+		if isSameUser(*redmineUser, *slackUser) {
+			return "<@" + slackUser.ID + ">"
 		}
 	}
-	return ru.Login
+
+	return idname.Name
+}
+
+func isSameUser(redmineUser redmine.User, slackUser objects.User) bool {
+	realName := strings.Replace(slackUser.RealName, "　", " ", -1)
+	if redmineUser.Login == slackUser.Name {
+		return true
+	}
+	switch realName {
+	case
+		redmineUser.Lastname + redmineUser.Firstname,
+		redmineUser.Lastname + " " + redmineUser.Firstname,
+		redmineUser.Firstname + redmineUser.Lastname,
+		redmineUser.Firstname + " " + redmineUser.Lastname:
+
+		return true
+	}
+	if mappedName, ok := userMap[slackUser.RealName]; ok {
+		slackUser.RealName = mappedName
+		return isSameUser(redmineUser, slackUser)
+	}
+	return false
 }
