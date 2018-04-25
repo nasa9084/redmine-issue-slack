@@ -132,19 +132,25 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 }
 
 func extractTicketID(s string) int {
-	pos := strings.IndexRune(s, '#')
-	if pos < 0 {
-		return -1
-	}
-	r := []rune(s)[pos+1:]
-	s = string(r)
-	for i := range r {
-		if !unicode.IsDigit(r[i]) {
-			s = string(r[:i])
+	rs := []rune(s)
+	pos := -1
+	for i, r := range rs {
+		if r == '#' {
+			pos = i
 			break
 		}
 	}
-	id, err := strconv.Atoi(s)
+	if pos < 0 {
+		return -1
+	}
+	var idr []rune
+	for i := pos + 1; i < len(rs); i++ {
+		if !unicode.IsDigit(rs[i]) {
+			break
+		}
+		idr = append(idr, rs[i])
+	}
+	id, err := strconv.Atoi(string(idr))
 	if err != nil {
 		return -1
 	}

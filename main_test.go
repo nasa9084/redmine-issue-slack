@@ -14,6 +14,7 @@ func TestExtractTicketID(t *testing.T) {
 		{"#123bar", 123},
 		{"foo#123bar", 123},
 		{"foo#123bar#456baz", 123},
+		{"ほげ #123", 123},
 	}
 	for _, c := range candidates {
 		if out := extractTicketID(c.in); out != c.expect {
