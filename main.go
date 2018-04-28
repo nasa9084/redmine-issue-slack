@@ -109,8 +109,10 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 	if ticketID < 0 {
 		return
 	}
+	log.Printf("said #%d", ticketID)
 	issue, err := redmineClient.Issue(ticketID)
 	if err != nil {
+		log.Printf("[ERROR] %s", err)
 		return
 	}
 	msg := fmt.Sprintf("<%s/issues/%d|#%d>: %s", opts.Redmine.Endpoint, ticketID, ticketID, issue.Subject)
@@ -128,7 +130,10 @@ func processMessage(ctx context.Context, e *rtm.MessageEvent) {
 			},
 		},
 	}
-	slackRESTClient.Chat().PostMessage(e.Channel).LinkNames(true).Text(msg).Attachment(attachment).Do(ctx)
+	_, err = slackRESTClient.Chat().PostMessage(e.Channel).LinkNames(true).Text(msg).Attachment(attachment).Do(ctx)
+	if err != nil {
+		log.Printf("[ERROR] %s", err)
+	}
 }
 
 func extractTicketID(s string) int {
