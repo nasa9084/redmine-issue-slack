@@ -1,9 +1,8 @@
 # redmine-issue-slack
-=====================
 
 a slack bot searches your redmine ticket by ticket ID
 
-![screenshot](redmine-issue-slack-screenshot.png)
+![screenshot](assets/redmine-issue-slack-screenshot.png)
 
 ## INSTALL
 
