@@ -170,10 +170,12 @@ func getUser(ctx context.Context, idname *redmine.IdName) string {
 	}
 	redmineUser, err := redmineClient.User(idname.Id)
 	if err != nil {
+		log.Printf("error in getUser/redmineClient.User: %s", err)
 		return idname.Name
 	}
 	slackUserList, err := slackRESTClient.Users().List().Do(ctx)
 	if err != nil {
+		log.Printf("error in getUser/slackRESTClient.Users.List: %s", err)
 		return idname.Name
 	}
 	for _, slackUser := range slackUserList {
@@ -203,5 +205,6 @@ func isSameUser(redmineUser redmine.User, slackUser objects.User) bool {
 		slackUser.RealName = mappedName
 		return isSameUser(redmineUser, slackUser)
 	}
+	log.Printf("user mapping not found: slack/%s, redmine/%s", realName, redmineUser.Lastname+redmineUser.Firstname)
 	return false
 }
