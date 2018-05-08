@@ -72,9 +72,10 @@ func loadUserMap() map[string]string {
 		return map[string]string{}
 	}
 	defer f.Close()
-	log.Print("loaded usermapping json")
+	log.Print("loading usermapping json")
 	m := map[string]string{}
 	if err := json.NewDecoder(f).Decode(&m); err != nil {
+		log.Printf("error in loading usermapping.json: %s", err)
 		return map[string]string{}
 	}
 	log.Printf("usermap: %+v", m)
