@@ -77,6 +77,7 @@ func loadUserMap() map[string]string {
 	if err := json.NewDecoder(f).Decode(&m); err != nil {
 		return map[string]string{}
 	}
+	log.Printf("usermap: %+v", m)
 	return m
 }
 
